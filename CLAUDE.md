@@ -14,6 +14,7 @@ BetterAndBetter 를 대체하는 macOS 메뉴바 상주 앱. 우클릭 드래그
 ## 구조
 
 - `Sources/GestureCore` : 궤적 → 방향열 → Gesture 매핑. AppKit 의존 없음, 테스트 대상.
+- `Resources/AppIcon.icns` : `scripts/make-icon.swift` 로 생성한 앱 아이콘 (메뉴바와 같은 scribble.variable).
 - `Sources/MouseBetter/MouseGestureTap.swift` : CGEventTap 으로 우클릭 down/drag/up 처리. 움직임 없으면 클릭 재전송.
 - `TrailOverlay.swift` : 모니터별 투명 창에 CAShapeLayer 로 궤적 표시.
 - `Actions.swift` : 탭 닫기·리로드는 AX 로 창 포커스 후 ⌘W/⌘R 전송, 스크롤은 픽셀 휠 이벤트.
@@ -30,4 +31,7 @@ BetterAndBetter 를 대체하는 macOS 메뉴바 상주 앱. 우클릭 드래그
 
 - 좌표계: CGEvent·AX·CGWindowList 는 Quartz(좌상단 원점), NSScreen·NSWindow 는 Cocoa(좌하단 원점). 변환은 `ScreenGeometry`.
 - ad-hoc 서명은 빌드마다 서명 해시가 바뀌어 손쉬운 사용 권한이 무효가 된다. 재빌드 후에는 `install` 로 권한을 다시 받는다.
+- 창 이동은 `AXEnhancedUserInterface` 가 켜진 앱에서 비동기로 처리되어 모니터 간 이동이 깨진다. `AX.setFrame` 이 조작 중에만 끈다.
+- 세로형 외장 모니터는 visibleFrame 과 달리 상단 30pt 에 창을 들이지 않는다. `WindowSnapper.place` 가 밀려난 폭을 모니터별로 기억한다.
+- 창 동작 검증은 터미널에 손쉬운 사용 권한이 있으면 AXHelpers·WindowSnapper·HotKeyCenter 를 swiftc 로 엮은 하네스로 Finder 창에 직접 실행해 확인할 수 있다.
 - 재전송 이벤트는 `eventSourceUserData = 0x4D424554` 로 표시해 탭이 다시 가로채지 않게 한다.

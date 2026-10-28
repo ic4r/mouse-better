@@ -3,6 +3,7 @@
 #   scripts/build.sh            # build/MouseBetter.app 생성
 #   scripts/build.sh install    # ~/Applications 에 설치 후 실행 (손쉬운 사용 권한 재요청)
 #   scripts/build.sh test       # 제스처 인식기 단위 테스트
+#   swift scripts/make-icon.swift  # 앱 아이콘(Resources/AppIcon.icns) 재생성
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -24,6 +25,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/MouseBetter" "$APP/Contents/MacOS/"
 cp Resources/Info.plist "$APP/Contents/"
+cp Resources/AppIcon.icns "$APP/Contents/Resources/"
 codesign --force --sign - --identifier "$BUNDLE_ID" "$APP"
 echo "built: $APP"
 

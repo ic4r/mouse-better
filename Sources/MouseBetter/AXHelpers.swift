@@ -47,6 +47,22 @@ enum AX {
         var origin = frame.origin
         var extent = frame.size
         guard let position = AXValueCreate(.cgPoint, &origin), let size = AXValueCreate(.cgSize, &extent) else { return }
+
+        // 다른 보조 기능 앱이 AXEnhancedUserInterface 를 켜 두면 크기 변경이 애니메이션으로 비동기 처리되어
+        // 모니터를 넘나들 때 위치 지정이 무시되거나 크기가 뒤섞인다. 조작하는 동안만 끄고 원래 값으로 돌려놓는다.
+        var pid: pid_t = 0
+        AXUIElementGetPid(window, &pid)
+        let app = AXUIElementCreateApplication(pid)
+        let enhancedUI = (attribute(app, "AXEnhancedUserInterface") as? Bool) == true
+        if enhancedUI {
+            AXUIElementSetAttributeValue(app, "AXEnhancedUserInterface" as CFString, kCFBooleanFalse)
+        }
+        defer {
+            if enhancedUI {
+                AXUIElementSetAttributeValue(app, "AXEnhancedUserInterface" as CFString, kCFBooleanTrue)
+            }
+        }
+
         // 모니터를 넘나들 때 크기 제약에 걸리지 않도록 크기 → 위치 → 크기 순서로 적용한다
         AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, size)
         AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, position)
