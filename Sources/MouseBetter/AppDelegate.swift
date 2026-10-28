@@ -2,6 +2,7 @@ import AppKit
 import Carbon.HIToolbox
 import GestureCore
 import ServiceManagement
+import UniformTypeIdentifiers
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
@@ -138,6 +139,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 submenu.addItem(item)
             }
         }
+        submenu.addItem(.separator())
+        let addItem = NSMenuItem(title: "앱 추가…", action: #selector(addExclusion), keyEquivalent: "")
+        addItem.target = self
+        submenu.addItem(addItem)
 
         permissionItem.title = Permissions.isTrusted(prompt: false)
             ? "손쉬운 사용 권한: 허용됨"
@@ -157,6 +162,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func removeExclusion(_ sender: NSMenuItem) {
         guard let bundleID = sender.representedObject as? String else { return }
         settings.setExcluded(bundleID, false)
+    }
+
+    /// 실행 중이 아닌 앱이나 전체 화면이라 메뉴바를 열기 어려운 앱도 등록할 수 있게 .app 을 직접 고른다.
+    @objc private func addExclusion() {
+        let panel = NSOpenPanel()
+        panel.message = "제스처를 사용하지 않을 앱을 선택하세요"
+        panel.prompt = "예외에 추가"
+        panel.allowedContentTypes = [.application]
+        panel.allowsMultipleSelection = true
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        // 메뉴바 앱은 활성화되어 있지 않으므로 먼저 활성화해야 패널이 앞에 뜬다
+        NSApp.activate()
+        guard panel.runModal() == .OK else { return }
+        for url in panel.urls {
+            if let bundleID = Bundle(url: url)?.bundleIdentifier {
+                settings.setExcluded(bundleID, true)
+            }
+        }
     }
 
     @objc private func openAccessibilitySettings() {
