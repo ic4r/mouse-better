@@ -6,6 +6,8 @@ macOS 메뉴바에 상주하는 마우스 제스처·창 관리 앱입니다. Be
 - `⌃⌥⌘` 조합 단축키로 창을 절반 배치, 최대화, 모니터 이동, 전체 화면 전환합니다.
 - Xcode 없이 Command Line Tools 와 Swift Package Manager 만으로 빌드합니다.
 
+설계 결정, 문제 해결 기록, 로드맵은 [개발 문서](docs/DEVELOPMENT.md), 변경 내용은 [CHANGELOG](CHANGELOG.md) 에 정리되어 있습니다.
+
 ## 기능
 
 ### 마우스 제스처 (우클릭 드래그)

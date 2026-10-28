@@ -1,7 +1,8 @@
 # MouseBetter
 
 BetterAndBetter 를 대체하는 macOS 메뉴바 상주 앱. 우클릭 드래그 제스처와 창 스냅 단축키를 제공한다.
-작업 기록 문서: https://claude.ai/artifact/6kDGKfqLueXbVxAdFaAe4Q
+개발 문서: `docs/DEVELOPMENT.md` (설계·문제 해결·검증·로드맵), 변경 이력: `CHANGELOG.md`.
+이 프로젝트의 문서는 Claude Docs 가 아니라 저장소의 마크다운으로 관리한다. 작업이 끝나면 두 문서를 함께 갱신한다.
 
 ## 빌드·실행
 
