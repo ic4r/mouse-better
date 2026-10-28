@@ -19,6 +19,7 @@ BetterAndBetter 를 대체하는 macOS 메뉴바 상주 앱. 우클릭 드래그
 - `Sources/MouseBetter/MouseGestureTap.swift` : CGEventTap 으로 우클릭 down/drag/up 처리. 움직임 없으면 클릭 재전송.
 - `TrailOverlay.swift` : 모니터별 투명 창에 CAShapeLayer 로 궤적 표시.
 - `Actions.swift` : 탭 닫기·리로드는 AX 로 창 포커스 후 ⌘W/⌘R 전송, 스크롤은 픽셀 휠 이벤트.
+- `GestureSettings.swift` : 제스처 사용 여부(⌃⌥⌘G 토글)와 예외 앱 번들 ID 목록을 UserDefaults 에 저장. 우클릭 down 시 커서 아래 창의 앱으로 예외 판정.
 - `AppHistory.swift` : 앱 활성화 순서 기록, ㄱ 제스처로 직전 앱 활성화 (⌘Tab 대체).
 - `WindowSnapper.swift` + `HotKeyCenter.swift` : Carbon 핫키(⌃⌥⌘ + 방향키/P/M/F//) → AX 로 창 위치·크기·전체 화면 설정.
 

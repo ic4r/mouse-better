@@ -21,8 +21,6 @@ final class MouseGestureTap {
     private var points: [CGPoint] = []
     private var swallowedDown: CGEvent?
 
-    var isEnabled = true
-
     init(overlay: TrailOverlay) {
         self.overlay = overlay
     }
@@ -71,7 +69,8 @@ final class MouseGestureTap {
         let location = event.location
         switch type {
         case .rightMouseDown:
-            guard isEnabled else { return pass }
+            // 제스처가 꺼져 있거나 예외 앱 위에서 누른 우클릭은 그대로 통과시킨다
+            guard GestureSettings.shared.shouldHandleGesture(at: location) else { return pass }
             tracking = true
             drawing = false
             points = [location]

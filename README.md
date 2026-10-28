@@ -35,6 +35,13 @@ macOS 메뉴바에 상주하는 마우스 제스처·창 관리 앱입니다. Be
 | `+` | 크기 키우기: 왼쪽 위 모서리를 고정한 채 가로를 모니터 폭까지 먼저 늘리고, 그다음 세로를 늘림 |
 | `-` | 크기 줄이기: 왼쪽 위 모서리를 고정한 채 가로와 세로를 함께 줄임 |
 
+### 제스처 끄기와 예외 앱
+
+- `⌃⌥⌘ G` 또는 메뉴바의 **마우스 제스처 사용** 으로 제스처 전체를 켜고 끕니다. 꺼져 있으면 메뉴바 아이콘이 흐리게 표시됩니다.
+- 우클릭 드래그를 직접 쓰는 앱은 예외로 등록하면 그 앱 위에서는 우클릭이 원래대로 동작합니다. 판단 기준은 맨 앞 앱이 아니라 우클릭한 위치의 창을 가진 앱입니다.
+- 메뉴바의 **〈앱 이름〉에서 제스처 사용 안 함** 으로 지금 쓰던 앱을 등록하거나 해제하고, **제스처 예외 앱** 하위 메뉴에서 등록된 앱을 해제합니다.
+- 처음 실행하면 Roblox(`com.roblox.RobloxPlayer`)와 iTerm(`com.googlecode.iterm2`)이 예외로 등록됩니다.
+
 메뉴바 아이콘을 누르면 현재 제공하는 제스처와 단축키 목록을 확인할 수 있습니다.
 
 ## 요구 사항
@@ -85,6 +92,7 @@ flowchart LR
 | `Sources/MouseBetter/MouseGestureTap.swift` | 우클릭 이벤트를 가로채 제스처를 처리하고, 움직임이 없으면 클릭을 재전송합니다. |
 | `Sources/MouseBetter/TrailOverlay.swift` | 모니터마다 투명 창을 띄워 궤적을 그립니다. |
 | `Sources/MouseBetter/Actions.swift` | 제스처별 동작을 실행합니다. |
+| `Sources/MouseBetter/GestureSettings.swift` | 제스처 사용 여부와 예외 앱 목록을 저장하고, 우클릭 위치의 앱이 예외인지 판단합니다. |
 | `Sources/MouseBetter/AppHistory.swift` | 앱 활성화 순서를 기록해 이전 앱으로 전환합니다. |
 | `Sources/MouseBetter/WindowSnapper.swift` | 창 명령과 단축키 매핑을 정의하고 실행합니다. |
 | `Sources/MouseBetter/HotKeyCenter.swift` | Carbon 전역 단축키를 등록합니다. |

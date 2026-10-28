@@ -46,7 +46,7 @@ enum Actions {
     }
 
     /// 창 목록은 앞에서 뒤 순서로 정렬되어 있다. 자기 자신(궤적 오버레이)과 메뉴바·Dock 등은 제외한다.
-    private static func topWindow(at point: CGPoint) -> (pid: pid_t, bounds: CGRect)? {
+    static func topWindow(at point: CGPoint) -> (pid: pid_t, bounds: CGRect)? {
         guard let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
             as? [[String: Any]] else { return nil }
         let me = getpid()

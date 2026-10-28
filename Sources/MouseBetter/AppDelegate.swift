@@ -1,16 +1,20 @@
 import AppKit
+import Carbon.HIToolbox
 import GestureCore
 import ServiceManagement
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private let overlay = TrailOverlay()
     private lazy var gestureTap = MouseGestureTap(overlay: overlay)
     private let hotKeys = HotKeyCenter()
+    private let settings = GestureSettings.shared
     private var permissionTimer: Timer?
 
-    private let enabledItem = NSMenuItem(title: "마우스 제스처 사용", action: #selector(toggleEnabled), keyEquivalent: "")
+    private let enabledItem = NSMenuItem(title: "마우스 제스처 사용", action: #selector(toggleEnabled), keyEquivalent: "g")
+    private let frontAppItem = NSMenuItem(title: "", action: #selector(toggleFrontAppExclusion(_:)), keyEquivalent: "")
+    private let exclusionsItem = NSMenuItem(title: "제스처 예외 앱", action: nil, keyEquivalent: "")
     private let permissionItem = NSMenuItem(title: "", action: #selector(openAccessibilitySettings), keyEquivalent: "")
     private let loginItem = NSMenuItem(title: "로그인 시 실행", action: #selector(toggleLoginItem), keyEquivalent: "")
 
@@ -18,6 +22,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupStatusItem()
         AppHistory.shared.start()
         WindowSnapper.registerHotKeys(on: hotKeys)
+        hotKeys.register(keyCode: kVK_ANSI_G, modifiers: controlKey | optionKey | cmdKey) { [weak self] in
+            self?.toggleEnabled()
+        }
+        settings.onChange = { [weak self] in self?.refreshMenu() }
         startWhenTrusted()
     }
 
@@ -48,10 +56,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         image?.isTemplate = true
         statusItem.button?.image = image
 
+        // 메뉴에는 단축키를 안내용으로만 표시한다 (실제 처리는 HotKeyCenter 가 전역으로 한다)
+        enabledItem.keyEquivalentModifierMask = [.control, .option, .command]
+        exclusionsItem.submenu = NSMenu()
+
         let menu = NSMenu()
+        menu.delegate = self
         menu.addItem(withTitle: "MouseBetter", action: nil, keyEquivalent: "").isEnabled = false
         menu.addItem(.separator())
-        for item in [enabledItem, permissionItem, loginItem] {
+        for item in [enabledItem, frontAppItem, exclusionsItem, permissionItem, loginItem] {
             item.target = self
             menu.addItem(item)
         }
@@ -69,7 +82,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let shape = binding.directions.map(\.arrow).joined(separator: " ")
             menu.addItem(featureItem(key: shape, title: binding.gesture.title))
         }
-        menu.addItem(.sectionHeader(title: "창 단축키 (\(WindowSnapper.modifierLabel) + 키)"))
+        menu.addItem(.sectionHeader(title: "단축키 (\(WindowSnapper.modifierLabel) + 키)"))
+        menu.addItem(featureItem(key: "G", title: "마우스 제스처 켜기·끄기"))
         for binding in WindowSnapper.bindings {
             menu.addItem(featureItem(key: binding.keyLabel, title: binding.command.title))
         }
@@ -88,8 +102,43 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return item
     }
 
+    /// 메뉴를 열 때마다 맨 앞 앱과 예외 목록을 다시 읽는다.
+    /// 메뉴바 메뉴를 열어도 MouseBetter 는 활성화되지 않으므로, 맨 앞 앱은 사용자가 쓰던 앱이다.
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        refreshMenu()
+    }
+
     private func refreshMenu() {
-        enabledItem.state = gestureTap.isEnabled ? .on : .off
+        enabledItem.state = settings.isEnabled ? .on : .off
+        statusItem.button?.appearsDisabled = !settings.isEnabled
+
+        if let app = NSWorkspace.shared.frontmostApplication, app.processIdentifier != getpid(),
+           let bundleID = app.bundleIdentifier {
+            frontAppItem.title = "\(app.localizedName ?? bundleID)에서 제스처 사용 안 함"
+            frontAppItem.representedObject = bundleID
+            frontAppItem.state = settings.isExcluded(bundleID) ? .on : .off
+            frontAppItem.isHidden = false
+        } else {
+            frontAppItem.isHidden = true
+        }
+
+        let submenu = exclusionsItem.submenu!
+        submenu.removeAllItems()
+        let names = settings.excluded.map { (id: $0, name: GestureSettings.displayName(of: $0)) }
+            .sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
+        if names.isEmpty {
+            submenu.addItem(withTitle: "없음", action: nil, keyEquivalent: "").isEnabled = false
+        } else {
+            submenu.addItem(withTitle: "선택하면 예외에서 해제", action: nil, keyEquivalent: "").isEnabled = false
+            for entry in names {
+                let item = NSMenuItem(title: entry.name, action: #selector(removeExclusion(_:)), keyEquivalent: "")
+                item.target = self
+                item.representedObject = entry.id
+                item.toolTip = entry.id
+                submenu.addItem(item)
+            }
+        }
+
         permissionItem.title = Permissions.isTrusted(prompt: false)
             ? "손쉬운 사용 권한: 허용됨"
             : "손쉬운 사용 권한 필요 (클릭하여 설정 열기)"
@@ -97,8 +146,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func toggleEnabled() {
-        gestureTap.isEnabled.toggle()
-        refreshMenu()
+        settings.isEnabled.toggle()
+    }
+
+    @objc private func toggleFrontAppExclusion(_ sender: NSMenuItem) {
+        guard let bundleID = sender.representedObject as? String else { return }
+        settings.setExcluded(bundleID, !settings.isExcluded(bundleID))
+    }
+
+    @objc private func removeExclusion(_ sender: NSMenuItem) {
+        guard let bundleID = sender.representedObject as? String else { return }
+        settings.setExcluded(bundleID, false)
     }
 
     @objc private func openAccessibilitySettings() {
