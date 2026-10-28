@@ -179,7 +179,7 @@ enum WindowSnapper {
     }
 
     /// 키우기: 가로를 먼저 모니터 폭까지 늘리고, 가로가 가득 차면 세로를 늘린다.
-    /// 키울 때는 창의 중심을 유지하고, 줄일 때는 왼쪽 위 모서리를 고정한다.
+    /// 키우기·줄이기 모두 왼쪽 위 모서리를 고정한다. 키우다가 화면 오른쪽·아래 끝에 닿으면 그만큼만 안쪽으로 민다.
     private static func resize(_ frame: CGRect, grow: Bool, in area: CGRect) -> CGRect {
         let stepX = (area.width * resizeStep).rounded()
         let stepY = (area.height * resizeStep).rounded()
@@ -190,11 +190,13 @@ enum WindowSnapper {
             } else {
                 size.height = min(size.height + stepY, area.height)
             }
-            return fit(size, centeredAt: CGPoint(x: frame.midX, y: frame.midY), in: area)
+        } else {
+            size.width = max(size.width - stepX, minimumSize.width)
+            size.height = max(size.height - stepY, minimumSize.height)
         }
-        size.width = max(size.width - stepX, minimumSize.width)
-        size.height = max(size.height - stepY, minimumSize.height)
-        return CGRect(origin: frame.origin, size: size).integral
+        let x = max(min(frame.minX, area.maxX - size.width), area.minX)
+        let y = max(min(frame.minY, area.maxY - size.height), area.minY)
+        return CGRect(x: x, y: y, width: size.width, height: size.height).integral
     }
 
     /// center 를 중심으로 size 크기의 사각형을 만들되, area 밖으로 나가면 안쪽으로 밀어 넣는다.
