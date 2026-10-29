@@ -4,7 +4,7 @@ import GestureCore
 
 /// 제스처에 대응하는 동작을 실행한다.
 ///
-/// - 탭 닫기, 리로드: 앱마다 탭 구조가 달라 AX 로는 공통 처리가 불가능하므로 단축키를 보낸다.
+/// - 뒤로·앞으로 가기, 탭 닫기, 리로드: 앱마다 탭 구조가 달라 AX 로는 공통 처리가 불가능하므로 단축키를 보낸다.
 ///   다만 우클릭을 삼켰기 때문에 제스처를 그린 창이 포커스를 받지 못한다. 그래서 먼저 AX 로
 ///   그 창을 앞으로 가져온 다음 키를 보낸다.
 /// - 스크롤: 키보드 포커스와 무관하게 커서 아래 뷰가 반응하도록 스크롤 휠 이벤트를 보낸다.
@@ -12,6 +12,10 @@ import GestureCore
 enum Actions {
     static func perform(_ gesture: Gesture, startedAt point: CGPoint) {
         switch gesture {
+        case .back:
+            focusWindow(at: point) { sendKey(CGKeyCode(kVK_ANSI_LeftBracket), flags: .maskCommand) }
+        case .forward:
+            focusWindow(at: point) { sendKey(CGKeyCode(kVK_ANSI_RightBracket), flags: .maskCommand) }
         case .closeTab:
             focusWindow(at: point) { sendKey(CGKeyCode(kVK_ANSI_W), flags: .maskCommand) }
         case .reload:

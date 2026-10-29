@@ -35,6 +35,11 @@ private let recognizer = GestureRecognizer()
     #expect(Gesture(directions: dirs) == .reload)
 }
 
+@Test func horizontalStrokesNavigate() {
+    #expect(Gesture(directions: recognizer.directions(of: stroke((-250, 0)))) == .back)
+    #expect(Gesture(directions: recognizer.directions(of: stroke((250, 0)))) == .forward)
+}
+
 @Test func everyGestureHasExactlyOneBinding() {
     for gesture in Gesture.allCases {
         #expect(Gesture.bindings.filter { $0.gesture == gesture }.count == 1)

@@ -62,6 +62,8 @@ extension Direction {
 }
 
 public enum Gesture: CaseIterable {
+    case back
+    case forward
     case closeTab
     case reload
     case previousApp
@@ -71,6 +73,8 @@ public enum Gesture: CaseIterable {
     /// 방향열 → 제스처 매핑. 메뉴바의 기능 목록도 이 표로 만든다.
     /// 제스처를 추가할 때는 여기에 한 줄, Actions.perform 에 동작 한 줄을 추가한다.
     public static let bindings: [(directions: [Direction], gesture: Gesture)] = [
+        ([.left], .back),
+        ([.right], .forward),
         ([.down, .right], .closeTab),     // ㄴ
         ([.down, .left], .reload),
         ([.right, .down], .previousApp),  // ㄱ
@@ -85,6 +89,8 @@ public enum Gesture: CaseIterable {
 
     public var title: String {
         switch self {
+        case .back: return "뒤로 가기"
+        case .forward: return "앞으로 가기"
         case .closeTab: return "탭 닫기"
         case .reload: return "새로고침"
         case .previousApp: return "이전 앱으로 전환"
