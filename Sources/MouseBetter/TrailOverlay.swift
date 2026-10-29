@@ -85,6 +85,8 @@ final class TrailOverlay {
     private func makeCanvas(frame: CGRect) -> Canvas {
         let window = NSWindow(contentRect: frame, styleMask: .borderless, backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
+        // 기본 등장 애니메이션은 창을 작게 띄웠다가 키우므로, 궤적이 모니터 중앙 쪽에 나타났다가 미끄러져 보인다
+        window.animationBehavior = .none
         window.isOpaque = false
         window.backgroundColor = .clear
         window.hasShadow = false
